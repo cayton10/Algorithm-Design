@@ -1,1 +1,4 @@
 .DS_Store
+# Ignore executables
+main.exe.dSYM
+main.exe

@@ -1,0 +1,123 @@
+{
+   "rooms" : {
+      "ML119" : 30,
+      "ML122" : 22,
+      "WAEC1104" : 24
+   },
+   "classes" : {
+      "CIT265" : {
+         "days" : "MWF",
+         "end" : 1100,
+         "start" : 1000,
+         "size" : 24
+      },
+      "CIT340" : {
+         "days" : "MWF",
+         "end" : 1000,
+         "size" : 24,
+         "start" : 900
+      },
+      "CS120" : {
+         "days" : "TR",
+         "end" : 1100,
+         "start" : 930,
+         "size" : 30
+      },
+      "CIT466" : {
+         "end" : 1230,
+         "days" : "TR",
+         "start" : 1100,
+         "size" : 18
+      },
+      "CIT163" : {
+         "days" : "TR",
+         "end" : 1100,
+         "size" : 24,
+         "start" : 930
+      },
+      "CIT263" : {
+         "end" : 1400,
+         "days" : "TR",
+         "size" : 30,
+         "start" : 1230
+      },
+      "IST150a" : {
+         "start" : 900,
+         "size" : 30,
+         "days" : "MWF",
+         "end" : 1000
+      },
+      "CIT352" : {
+         "days" : "MWF",
+         "end" : 1430,
+         "size" : 24,
+         "start" : 1300
+      },
+      "CIT313" : {
+         "days" : "MWF",
+         "end" : 1200,
+         "start" : 1100,
+         "size" : 30
+      },
+      "CIT266" : {
+         "days" : "TR",
+         "end" : 930,
+         "start" : 800,
+         "size" : 30
+      },
+      "IST150b" : {
+         "end" : 1000,
+         "days" : "MWF",
+         "size" : 30,
+         "start" : 900
+      },
+      "NRE323" : {
+         "days" : "TR",
+         "end" : 1230,
+         "size" : 22,
+         "start" : 1100
+      },
+      "CIT260" : {
+         "days" : "TR",
+         "end" : 1530,
+         "start" : 1400,
+         "size" : 30
+      },
+      "NRE480" : {
+         "days" : "TR",
+         "end" : 930,
+         "size" : 22,
+         "start" : 800
+      },
+      "NRRM200" : {
+         "start" : 1500,
+         "size" : 30,
+         "days" : "MWF",
+         "end" : 1700
+      },
+      "CIT332" : {
+         "size" : 24,
+         "start" : 1430,
+         "days" : "MWF",
+         "end" : 1600
+      },
+      "CIT440" : {
+         "size" : 18,
+         "start" : 1100,
+         "days" : "MWF",
+         "end" : 1200
+      },
+      "CIT447" : {
+         "size" : 18,
+         "start" : 1230,
+         "days" : "TR",
+         "end" : 1400
+      },
+      "CIT365" : {
+         "end" : 1300,
+         "days" : "MWF",
+         "size" : 24,
+         "start" : 1200
+      }
+   }
+}

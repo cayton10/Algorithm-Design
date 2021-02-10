@@ -11,7 +11,7 @@
             "label": "shell: clang build active file",
             "command": "/usr/bin/clang",
             "args": [
-                "-std=c++17",
+                "-std=c++11",
                 "-stdlib=libc++",
                 "-g",
                 "${file}",
@@ -31,7 +31,7 @@
             "label": "shell: clang++ build active file",
             "command": "/usr/bin/clang++",
             "args": [
-                "-std=c++17",
+                "-std=c++11",
                 "-stdlib=libc++",
                 "-g",
                 "${file}",
@@ -51,7 +51,7 @@
             "label": "shell: g++ build active file",
             "command": "/usr/bin/g++",
             "args": [
-                "-std=c++17",
+                "-std=c++11",
                 "-stdlib=libc++",
                 "-g",
                 "${file}",
@@ -74,7 +74,7 @@
             "label": "g++ build active file",
             "command": "/usr/bin/g++",
             "args": [
-                "-std=c++17",
+                "-std=c++11",
                 "-stdlib=libc++",
                 "-g",
                 "${file}",
