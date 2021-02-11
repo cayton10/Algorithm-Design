@@ -19,6 +19,7 @@ using json = nlohmann::json;
 
 using namespace std;
 
+/* ----------------------------- DECLARE STRUCTS ---------------------------- */
 struct Course 
 {
     std::string name;
@@ -75,6 +76,8 @@ int main()
     vector<Course> courses;
     vector<Room> rooms;
 
+/* ----------------- ITERATE OVER JSON - LOAD COURSE VECTOR ----------------- */
+
     //Iterate over classes and create structs for container
     for(const auto& item : schedule["classes"].items())
     {
@@ -88,8 +91,23 @@ int main()
         courses.push_back(newCourse);
     }
 
+    for(const auto& item : schedule["rooms"].items())
+    {
+        Room newRoom;
+        newRoom.name = item.key();
+        newRoom.capacity = item.value();
+
+        rooms.push_back(newRoom);
+    }
+
+    for(const Room& item : rooms)
+    {
+        cout << item.name << ": capacity - " << item.capacity << " seats. \n";
+    }
+
     //Sort courses by end time
     sort(courses.begin(), courses.end(), compareByEndTime);
+
 
     for(const Course& item : courses)
     {
@@ -99,8 +117,7 @@ int main()
         cout << "  days: " << item.days << "\n";
         cout << "  class size: " << item.size << "\n\n";
     }
-    //cout << j["classes"] << endl;
-    
+  
 
     return 0;
 }
