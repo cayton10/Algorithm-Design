@@ -11,6 +11,8 @@
 #include <fstream>
 #include <string>
 #include <algorithm>
+#include <vector>
+#include <deque>
 //Req library for JSON parsing
 #include <nlohmann/json.hpp> //https://github.com/nlohmann/json
 
@@ -33,7 +35,7 @@ struct Room
 {
     std::string name;
     int capacity;
-    vector<Course> session;//Each room will store clas sessions for our schedule
+    vector<Course> sessions;//Each room will store clas sessions for our schedule
 };
 
 /**
@@ -51,6 +53,51 @@ bool sortClasses(const Course& a, const Course& b)
     }
     else
         return a.endTime < b.endTime;
+}
+
+/**
+ * Returns rooms in descending order of room capacity
+ */
+bool sortRooms(const Room& a, const Room& b)
+{
+    return a.capacity < b.capacity;
+}
+
+void addClasses(deque<Course>& courses, vector<Room>& rooms)
+{
+    //Iterate through course list and check room info
+    for(Course& c : courses)
+    {
+        for(Room& room : rooms)
+        {
+            //If class will fit, check availabililty
+            if(c.size <= room.capacity)
+            {
+                //If no classes have been scheduled, add this one
+                if(room.sessions.empty())
+                {
+                    room.sessions.push_back(c);
+                    courses.pop_front();
+                    break;
+                }
+                else //Now we have to iterate through this room's session schedule to find a fit
+                {
+                    for(Course& session : room.sessions)
+                    {
+                        if(c.startTime >= session.endTime || strcmp(c.days.c_str(), session.days.c_str()) != 0)
+                        {
+                            room.sessions.push_back(c);
+                            courses.pop_front();
+                            break;
+                        }
+                        else
+                            break;
+                    }
+                    break;
+                }
+            }
+        }
+    }
 }
 
 
@@ -84,7 +131,8 @@ int main()
     inData.close();
 
     //Declare our data structures
-    vector<Course> courses;
+    deque<Course> courses; //We'll use a deque so we can eliminate classes as they are added
+                            //If any elements remain, we've failed.
     vector<Room> rooms;
 
 /* ----------------- ITERATE OVER JSON - LOAD COURSE VECTOR ----------------- */
@@ -114,12 +162,16 @@ int main()
         rooms.push_back(newRoom);
     }
 
+    //Sort rooms by capacity
+    sort(rooms.begin(), rooms.end(), sortRooms);
+
     for(const Room& item : rooms)
     {
         cout << item.name << ": capacity - " << item.capacity << " seats. \n";
     }
 
-
+/* ---------------------- OUTPUT CLASS LIST INFORMATION --------------------- */
+/*
     for(const Course& item : courses)
     {
         cout << item.name << ": " << "\n";
@@ -128,7 +180,12 @@ int main()
         cout << "  days: " << item.days << "\n";
         cout << "  class size: " << item.size << "\n\n";
     }
-  
+*/
+
+cout << courses.size() << endl;
+    //Send courses to the meat grinder
+    addClasses(courses, rooms);
+    cout << courses.size() << endl;  
 
     return 0;
 }
