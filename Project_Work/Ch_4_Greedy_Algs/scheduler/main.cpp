@@ -84,7 +84,7 @@ void addClasses(deque<Course>& courses, vector<Room>& rooms)
                 {
                     for(Course& session : room.sessions)
                     {
-                        if(c.startTime >= session.endTime || strcmp(c.days.c_str(), session.days.c_str()) != 0)
+                        if(c.startTime >= session.endTime && strcmp(c.days.c_str(), session.days.c_str()) != 0)
                         {
                             room.sessions.push_back(c);
                             courses.pop_front();
@@ -93,7 +93,6 @@ void addClasses(deque<Course>& courses, vector<Room>& rooms)
                         else
                             break;
                     }
-                    break;
                 }
             }
         }
