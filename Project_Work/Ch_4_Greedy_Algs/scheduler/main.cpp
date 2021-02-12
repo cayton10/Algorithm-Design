@@ -33,15 +33,26 @@ struct Room
 {
     std::string name;
     int capacity;
+    vector<Course> session;//Each room will store clas sessions for our schedule
 };
 
 /**
  * Returns courses in descending order of lecture end times
  */
-bool compareByEndTime(const Course& a, const Course& b)
+bool sortClasses(const Course& a, const Course& b)
 {
-    return a.endTime < b.endTime;
+    //If endtimes are not the same, return less end time
+    if(a.endTime != b.endTime)
+        return a.endTime < b.endTime;
+    //If end times are equal, give us MWF classes first
+    if(strcmp(a.days.c_str(), b.days.c_str()) < 0)
+    {
+        return a.days < b.days;
+    }
+    else
+        return a.endTime < b.endTime;
 }
+
 
 int main()
 {
@@ -91,6 +102,9 @@ int main()
         courses.push_back(newCourse);
     }
 
+    //Sort courses by end time
+    sort(courses.begin(), courses.end(), sortClasses);
+
     for(const auto& item : schedule["rooms"].items())
     {
         Room newRoom;
@@ -104,9 +118,6 @@ int main()
     {
         cout << item.name << ": capacity - " << item.capacity << " seats. \n";
     }
-
-    //Sort courses by end time
-    sort(courses.begin(), courses.end(), compareByEndTime);
 
 
     for(const Course& item : courses)
