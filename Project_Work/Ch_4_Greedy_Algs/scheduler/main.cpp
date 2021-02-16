@@ -7,7 +7,6 @@
 
 //Dependencies
 #include <iostream>
-#include <iomanip>
 #include <fstream>
 #include <string>
 #include <algorithm>
@@ -48,7 +47,7 @@ bool sortClasses(const Course& a, const Course& b)
         return a.endTime < b.endTime;
 
         // ! Fix the strcmp and c_str
-        
+
     //If end times are equal, give us MWF classes first
     if(strcmp(a.days.c_str(), b.days.c_str()) < 0)
     {
@@ -66,7 +65,12 @@ bool sortRooms(const Room& a, const Room& b)
     return a.capacity < b.capacity;
 }
 
-void addClasses(deque<Course>& courses, vector<Room>& rooms)
+/**
+ * Takes a Course deque and vector of Rooms as parameters
+ * Adds class sessions to rooms if there are no conflicts
+ */
+
+void addClasses(deque<Course>& courses, vector<Room>& rooms, bool conflict)
 {
     //Iterate through course list and check room info
     for(Course& c : courses)
@@ -86,10 +90,16 @@ void addClasses(deque<Course>& courses, vector<Room>& rooms)
                 else //Now we have to iterate through this room's session schedule to find a fit
                 {
                     //TODO: It's just checking the first class time, dipshit. Make it check most recent.
-                    
+                    Course last = room.sessions.back();
+                    if(c.startTime >= last.endTime && c.days != last.days)
+                    {
+                        room.sessions.push_back(c);
+                        break;
+                    }
+                    /*
                     for(Course& session : room.sessions)
                     {
-                        if(c.startTime >= session.endTime && strcmp(c.days.c_str(), session.days.c_str()) != 0)
+                        if(c.startTime >= session.endTime && c.days != session.days)
                         {
                             room.sessions.push_back(c);
                             courses.pop_front();
@@ -98,6 +108,7 @@ void addClasses(deque<Course>& courses, vector<Room>& rooms)
                         else
                             break;
                     }
+                    */
                 }
             }
         }
@@ -173,7 +184,8 @@ int main()
     //Declare our data structures
     deque<Course> courses; 
     vector<Room> rooms;
-
+    bool conflict = false;
+    
     createClassesDeque(schedule, courses);
     createRoomsVector(schedule, rooms);
 
@@ -200,7 +212,7 @@ int main()
 
     cout << courses.size() << endl;
     //Send courses to the meat grinder
-    addClasses(courses, rooms);
+    addClasses(courses, rooms, conflict);
 
     for(Room room : rooms)
     {
@@ -209,7 +221,10 @@ int main()
         cout << "Class list: " << "\n";
         for(Course session : room.sessions)
         {
-            cout << session.name << ": Start: " << session.startTime << " End: " << session.endTime << " Days: " << session.days << "\n";
+            cout << session.name << ": Start: " << session.startTime 
+            << " End: " << session.endTime 
+            << " Days: " << session.days
+            << " Size: " << session.size << "\n";
         }
         cout << "\n\n";
     }
