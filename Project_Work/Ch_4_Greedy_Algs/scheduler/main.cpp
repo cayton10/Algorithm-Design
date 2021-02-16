@@ -91,9 +91,10 @@ void addClasses(deque<Course>& courses, vector<Room>& rooms, bool conflict)
                 {
                     //TODO: It's just checking the first class time, dipshit. Make it check most recent.
                     Course last = room.sessions.back();
-                    if(c.startTime >= last.endTime && c.days != last.days)
+                    if(c.startTime >= last.endTime || c.days != last.days)
                     {
                         room.sessions.push_back(c);
+                        courses.pop_front();
                         break;
                     }
                     /*
