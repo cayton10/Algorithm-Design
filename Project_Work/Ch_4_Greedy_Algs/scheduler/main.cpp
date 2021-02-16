@@ -82,6 +82,8 @@ void addClasses(deque<Course>& courses, vector<Room>& rooms)
                 }
                 else //Now we have to iterate through this room's session schedule to find a fit
                 {
+                    //TODO: It's just checking the first class time, dipshit. Make it check most recent.
+                    
                     for(Course& session : room.sessions)
                     {
                         if(c.startTime >= session.endTime && strcmp(c.days.c_str(), session.days.c_str()) != 0)
@@ -99,7 +101,47 @@ void addClasses(deque<Course>& courses, vector<Room>& rooms)
     }
 }
 
+/**
+ * Loads Course struct member variables from user defined JSON file
+ */
+void createClassesDeque(const json& j, deque<Course>& c)
+{
+    //Iterate over classes and create structs for container
+    for(const auto& item : j["classes"].items())
+    {
+        Course newCourse;
+        newCourse.name = item.key();
+        newCourse.days = item.value().at("days");
+        newCourse.startTime = item.value().at("start");
+        newCourse.endTime = item.value().at("end");
+        newCourse.size = item.value().at("size");
+        
+        c.push_back(newCourse);
+    }
+}
 
+/**
+ * Loads Room struct member variables from user defined JSON file
+ */
+void createRoomsVector(const json& j, vector<Room>& r)
+{
+    for(const auto& item : j["rooms"].items())
+    {
+        Room newRoom;
+        newRoom.name = item.key();
+        newRoom.capacity = item.value();
+
+        r.push_back(newRoom);
+    }
+
+}
+
+
+
+
+/* -------------------------------------------------------------------------- */
+/*                                 ENTRY POINT                                */
+/* -------------------------------------------------------------------------- */
 int main()
 {
 
@@ -112,56 +154,28 @@ int main()
     ifstream inData;
     std::string userFile = "schedules/sched2.txt";
 
-/*
+    /*
     getline(cin, userFile);//Read whole line from user input above
     //Prepend string with directory
     userFile.insert(0, "schedules/");
     //Add file extension
     userFile += ".txt";
     */
-
-/* ---------------------------- READ IN JSON FILE --------------------------- */
     
     inData.open(userFile.c_str());
-
     json schedule;
     inData >> schedule;
-
     inData.close();
 
     //Declare our data structures
-    deque<Course> courses; //We'll use a deque so we can eliminate classes as they are added
-                            //If any elements remain, we've failed.
+    deque<Course> courses; 
     vector<Room> rooms;
 
-/* ----------------- ITERATE OVER JSON - LOAD COURSE VECTOR ----------------- */
+    createClassesDeque(schedule, courses);
+    createRoomsVector(schedule, rooms);
 
-    //Iterate over classes and create structs for container
-    for(const auto& item : schedule["classes"].items())
-    {
-        Course newCourse;
-        newCourse.name = item.key();
-        newCourse.days = item.value().at("days");
-        newCourse.startTime = item.value().at("start");
-        newCourse.endTime = item.value().at("end");
-        newCourse.size = item.value().at("size");
-        
-        courses.push_back(newCourse);
-    }
-
-    //Sort courses by end time
+    //Sort courses / rooms for processing
     sort(courses.begin(), courses.end(), sortClasses);
-
-    for(const auto& item : schedule["rooms"].items())
-    {
-        Room newRoom;
-        newRoom.name = item.key();
-        newRoom.capacity = item.value();
-
-        rooms.push_back(newRoom);
-    }
-
-    //Sort rooms by capacity
     sort(rooms.begin(), rooms.end(), sortRooms);
 
     for(const Room& item : rooms)
@@ -181,9 +195,21 @@ int main()
     }
 */
 
-cout << courses.size() << endl;
+    cout << courses.size() << endl;
     //Send courses to the meat grinder
     addClasses(courses, rooms);
+
+    for(Room room : rooms)
+    {
+        cout << "Room name: " << room.name << "\n";
+        cout << "Room cap: " << room.capacity << "\n";
+        cout << "Class list: " << "\n";
+        for(Course session : room.sessions)
+        {
+            cout << session.name << ": Start: " << session.startTime << " End: " << session.endTime << " Days: " << session.days << "\n";
+        }
+        cout << "\n\n";
+    }
     cout << courses.size() << endl;  
 
     return 0;
