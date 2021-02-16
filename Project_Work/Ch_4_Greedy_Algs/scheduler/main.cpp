@@ -46,6 +46,9 @@ bool sortClasses(const Course& a, const Course& b)
     //If endtimes are not the same, return less end time
     if(a.endTime != b.endTime)
         return a.endTime < b.endTime;
+
+        // ! Fix the strcmp and c_str
+        
     //If end times are equal, give us MWF classes first
     if(strcmp(a.days.c_str(), b.days.c_str()) < 0)
     {
