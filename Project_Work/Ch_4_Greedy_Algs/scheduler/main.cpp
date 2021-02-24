@@ -34,7 +34,7 @@ struct Room
 {
     std::string name;
     int capacity;
-    vector<Course> sessions;//Each room will store clas sessions for our schedule
+    vector<Course> sessions;//Each room will store class sessions for our schedule
 };
 
 /**
@@ -69,52 +69,57 @@ bool sortRooms(const Room& a, const Room& b)
  * Takes a Course deque and vector of Rooms as parameters
  * Adds class sessions to rooms if there are no conflicts
  */
-
-void addClasses(deque<Course>& courses, vector<Room>& rooms, bool conflict)
+string addClasses(deque<Course>& courses, vector<Room>& rooms, bool conflict)
 {
-    //Iterate through course list and check room info
-    for(Course& c : courses)
+    //Returned message to user
+    string message = "";
+    string conflictName = "";
+    int courseCount = 0;
+    //Course iterator
+    deque<Course>::const_iterator course = courses.begin();
+
+    while(!conflict && course++ != courses.end())
     {
-        for(Room& room : rooms)
+        //Room iterator
+        vector<Room>::iterator room = rooms.begin();
+        bool slotFilled = false;
+
+        while(!slotFilled && room != rooms.end())
         {
-            //If class will fit, check availabililty
-            if(c.size <= room.capacity)
+            if(course->size <= room->capacity)
             {
-                //If no classes have been scheduled, add this one
-                if(room.sessions.empty())
+                if(room->sessions.empty())
                 {
-                    room.sessions.push_back(c);
-                    courses.pop_front();
-                    break;
+                    room->sessions.push_back(*course);
+                    slotFilled = true;
+                    courseCount++;
                 }
-                else //Now we have to iterate through this room's session schedule to find a fit
+                else if(!room->sessions.empty())
                 {
-                    //TODO: It's just checking the first class time, dipshit. Make it check most recent.
-                    Course last = room.sessions.back();
-                    if(c.startTime >= last.endTime || c.days != last.days)
+                    Course last = room->sessions.back();
+                    conflictName = last.name;
+                    if(course->startTime >= last.endTime || course->days != last.days)
                     {
-                        room.sessions.push_back(c);
-                        courses.pop_front();
-                        break;
+                        room->sessions.push_back(*course);
+                        slotFilled = true;
+                        courseCount++;
                     }
-                    /*
-                    for(Course& session : room.sessions)
-                    {
-                        if(c.startTime >= session.endTime && c.days != session.days)
-                        {
-                            room.sessions.push_back(c);
-                            courses.pop_front();
-                            break;
-                        }
-                        else
-                            break;
-                    }
-                    */
                 }
+            }
+            room++;
+            if(room == rooms.end() && !slotFilled)
+            {
+                message = course->name + " could not be scheduled. Conflict with: " + conflictName;
+                conflict = true;
             }
         }
     }
+
+    return message;
+        
 }
+
+    
 
 /**
  * Loads Course struct member variables from user defined JSON file
@@ -161,21 +166,18 @@ int main()
 {
 
     //Store the filename as character string for reading
-    /*string userFile;
+    string userFile;
     
     cout << "Enter the name of the schedule you'd like to process. IE: sched1, sched2, etc." << endl;
-    cout << "Filename: ";*/
+    cout << "Filename: ";
 
     ifstream inData;
-    std::string userFile = "schedules/sched2.txt";
 
-    /*
     getline(cin, userFile);//Read whole line from user input above
     //Prepend string with directory
     userFile.insert(0, "schedules/");
     //Add file extension
     userFile += ".txt";
-    */
     
     inData.open(userFile.c_str());
     json schedule;
@@ -194,42 +196,30 @@ int main()
     sort(courses.begin(), courses.end(), sortClasses);
     sort(rooms.begin(), rooms.end(), sortRooms);
 
-    for(const Room& item : rooms)
-    {
-        cout << item.name << ": capacity - " << item.capacity << " seats. \n";
-    }
+    string message = addClasses(courses, rooms, conflict);
 
-/* ---------------------- OUTPUT CLASS LIST INFORMATION --------------------- */
-/*
-    for(const Course& item : courses)
+    if(!conflict)
     {
-        cout << item.name << ": " << "\n";
-        cout << "  start: " << item.startTime << "\n";
-        cout << "  end: " << item.endTime << "\n";
-        cout << "  days: " << item.days << "\n";
-        cout << "  class size: " << item.size << "\n\n";
-    }
-*/
-
-    cout << courses.size() << endl;
-    //Send courses to the meat grinder
-    addClasses(courses, rooms, conflict);
-
-    for(Room room : rooms)
-    {
-        cout << "Room name: " << room.name << "\n";
-        cout << "Room cap: " << room.capacity << "\n";
-        cout << "Class list: " << "\n";
-        for(Course session : room.sessions)
+        for(Room room : rooms)
         {
-            cout << session.name << ": Start: " << session.startTime 
-            << " End: " << session.endTime 
-            << " Days: " << session.days
-            << " Size: " << session.size << "\n";
+            cout << "Room name: " << room.name << "\n";
+            cout << "Room cap: " << room.capacity << "\n";
+            cout << "Class list: " << "\n";
+            for(Course session : room.sessions)
+            {
+                cout << session.name << ": Start: " << session.startTime 
+                << " End: " << session.endTime 
+                << " Days: " << session.days
+                << " Size: " << session.size << "\n";
+            }
+            cout << "\n\n";
         }
-        cout << "\n\n";
     }
-    cout << courses.size() << endl;  
+    else
+    {
+        cout << message << endl;
+    }
+      
 
     return 0;
 }
