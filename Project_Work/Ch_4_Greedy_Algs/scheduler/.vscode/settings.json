@@ -5,6 +5,7 @@
         "stdexcept": "cpp",
         "string": "cpp",
         "vector": "cpp",
-        "iosfwd": "cpp"
+        "iosfwd": "cpp",
+        "deque": "cpp"
     }
 }

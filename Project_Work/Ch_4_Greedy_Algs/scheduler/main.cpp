@@ -7,6 +7,7 @@
 
 //Dependencies
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <string>
 #include <algorithm>
@@ -46,10 +47,8 @@ bool sortClasses(const Course& a, const Course& b)
     if(a.endTime != b.endTime)
         return a.endTime < b.endTime;
 
-        // ! Fix the strcmp and c_str
-
     //If end times are equal, give us MWF classes first
-    if(strcmp(a.days.c_str(), b.days.c_str()) < 0)
+    if(a.days == b.days)
     {
         return a.days < b.days;
     }
@@ -66,19 +65,30 @@ bool sortRooms(const Room& a, const Room& b)
 }
 
 /**
- * Takes a Course deque and vector of Rooms as parameters
- * Adds class sessions to rooms if there are no conflicts
+ * Takes vector<string>, Course::iterator and Course
+ * Only called if scheduling conflict exists. Updates conflict vector
  */
-string addClasses(deque<Course>& courses, vector<Room>& rooms, bool conflict)
+void recordConflict(const deque<Course>::const_iterator& c1, const Course& c2, vector<Course>& conf)
 {
-    //Returned message to user
-    string message = "";
-    string conflictName = "";
-    int courseCount = 0;
+    conf.push_back(*c1);
+    conf.push_back(c2);  
+}
+
+/**
+ * Takes 2 args: deque of Course, vector of Room
+ * Adds class sessions to rooms if there are no conflicts. Returns a vector of strings.
+ * If any scheduling conflicts exist, they are stored in the returned vector, else empty.
+ */
+vector<Course> addClasses(deque<Course>& courses, vector<Room>& rooms)
+{
+    //Conflict list
+    vector<Course> conflicts;
+    //Store name of conflicting class if one exists
+    Course conflictDetails;
     //Course iterator
     deque<Course>::const_iterator course = courses.begin();
 
-    while(!conflict && course++ != courses.end())
+    while(course != courses.end())
     {
         //Room iterator
         vector<Room>::iterator room = rooms.begin();
@@ -92,30 +102,38 @@ string addClasses(deque<Course>& courses, vector<Room>& rooms, bool conflict)
                 {
                     room->sessions.push_back(*course);
                     slotFilled = true;
-                    courseCount++;
                 }
                 else if(!room->sessions.empty())
                 {
+                    
                     Course last = room->sessions.back();
-                    conflictName = last.name;
+
                     if(course->startTime >= last.endTime || course->days != last.days)
                     {
                         room->sessions.push_back(*course);
                         slotFilled = true;
-                        courseCount++;
+                    }
+                    else
+                    {
+                        //Because of scope, store last course details here in case we can't find a room that works
+                        conflictDetails.name = last.name;
+                        conflictDetails.startTime = last.startTime;
+                        conflictDetails.endTime = last.endTime;
+                        conflictDetails.days = last.days;
+                        conflictDetails.size = last.size;
                     }
                 }
             }
             room++;
             if(room == rooms.end() && !slotFilled)
             {
-                message = course->name + " could not be scheduled. Conflict with: " + conflictName;
-                conflict = true;
+                recordConflict(course, conflictDetails, conflicts);
             }
         }
+        course++;
     }
 
-    return message;
+    return conflicts;
         
 }
 
@@ -149,11 +167,52 @@ void createRoomsVector(const json& j, vector<Room>& r)
     {
         Room newRoom;
         newRoom.name = item.key();
-        newRoom.capacity = item.value();
+        newRoom.capacity = item.value();   
 
         r.push_back(newRoom);
     }
 
+}
+
+
+/**
+ * Takes one arg. Vector of Course (Conflicts list)
+ * only called if vector is not empty.
+ */
+void printConflicts(const vector<Course>& c)
+{
+    cout << "\n";
+    cout << right << setfill('*') << setw(28) << "SCHEDULE" << right << setw(24) << "\n";
+    cout << right << setw(28) << "CONFLICT" << right << setw(24) << "\n";
+    cout << left << setfill(' ') << setw(10) << "\nCourse" << setw(8) << "Start" << setw(8) << "End" << setw(8) << "Days" << setw(5) << "Size\n";
+    
+    for(const auto& crs : c)
+    {
+        cout << left << setw(9) << crs.name << setw(8) << crs.startTime << setw(8) << crs.endTime << setw(8) << crs.days << setw(5) << crs.size << "\n";
+    }
+    cout << "\n";
+}
+
+/**
+ * Void function takes one parameter: vector of type <Room> and prints room details 
+ */
+
+void printSchedule(const vector<Room>& rooms)
+{
+    for(Room room : rooms)
+    {
+        cout << "Room name: " << room.name << "\n";
+        cout << "Room cap: " << room.capacity << "\n";
+        cout << "Class list: " << "\n";
+        for(Course session : room.sessions)
+        {
+            cout << session.name << ": Start: " << session.startTime 
+            << " End: " << session.endTime 
+            << " Days: " << session.days
+            << " Size: " << session.size << "\n";
+        }
+        cout << "\n\n";
+    }
 }
 
 
@@ -196,30 +255,14 @@ int main()
     sort(courses.begin(), courses.end(), sortClasses);
     sort(rooms.begin(), rooms.end(), sortRooms);
 
-    string message = addClasses(courses, rooms, conflict);
+    vector<Course> conflicts = addClasses(courses, rooms);
 
-    if(!conflict)
+    if(!conflicts.empty())
     {
-        for(Room room : rooms)
-        {
-            cout << "Room name: " << room.name << "\n";
-            cout << "Room cap: " << room.capacity << "\n";
-            cout << "Class list: " << "\n";
-            for(Course session : room.sessions)
-            {
-                cout << session.name << ": Start: " << session.startTime 
-                << " End: " << session.endTime 
-                << " Days: " << session.days
-                << " Size: " << session.size << "\n";
-            }
-            cout << "\n\n";
-        }
+        printConflicts(conflicts);
     }
-    else
-    {
-        cout << message << endl;
-    }
-      
+
+    printSchedule(rooms);
 
     return 0;
 }
