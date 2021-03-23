@@ -13,58 +13,70 @@
 
 using namespace std;
 
-void getSubsetNum(vector<int> const &vec, int const &max, vector<vector<int> > &t, int &pos, int const &length)
+
+int CountSubSets(vector<int> const &A, int const &M)
 {
-    for(int i = pos; i < vec.size(); i++)
+    //Num elements from array / vector 1st-D
+    //Product of elements 2nd-D
+    
+    vector<vector<int> > cache;
+    
+    cache.resize(A.size() + 1);
+    
+    for(int i = 0; i <= A.size(); i++)
+    {
+        cache[i].resize(M + 1);
+    }
+    
+    //Elements(1-J)
+    
+    for(int target = 2; target <= M; target++)
+    {
+        cache[0][target] = 1;
+    }
+    
+    for(int nextElem = 1; nextElem <= A.size(); nextElem++)
     {
         
-        vector<int> temp;
-        int current = vec[i];
-        int product = current;
-        int prevProduct = 1;
-        if(current < max)
+        for(int target = 1; target <= M; target++)
         {
-            temp.push_back(current);
-            t.push_back(temp);
-        }
-
-        for(int k = i + 1; k < vec.size(); k++)
-        {
+            //Load cache[numElem][target]
             
-            if(product * vec[k] < max)
+            /*Sum of two things: subseq that don't use next elem & already have prod < target
+             ALSO: seq that DO use next elem, prod of previous is < target / nextElemnt */
+            int first = cache[nextElem - 1][target];
+            int second = cache[nextElem - 1][target / A[nextElem - 1]];
+            if(target % A[nextElem - 1] != 0)
             {
-                prevProduct = product;
-                product = product * vec[k];
-                temp.push_back(vec[k]);
+                second = cache[nextElem - 1][1 + target / A[nextElem - 1]];
             }
+            cache[nextElem][target] = first + second;
+            
+        }
+    }
+    
+    /*for(int i = 0; i <= A.size(); i++)
+    {
+        for(int k = 0; k <= M; k++)
+        {
+            printf("%2d ", cache[i][k]);
         }
         
-        if(temp.size() > 1) {
-            t.push_back(temp);
-        }
-    }
+        cout << endl;
+    }*/
     
-    pos++;
-
-    if(pos == vec.size())
-    {
-        return;
-    }
-    else {
-        getSubsetNum(vec, max, t, pos, length);
-    }
     
+    return cache[A.size()][M] - 1; //Minus one for empty sequence
 }
 
 int main(int argc, const char * argv[]) {
     
-    vector<int> A{1,2,3,4};
+    //int N = 40;
+    
+    vector<int> A = {1,2,3,4};
     vector<vector<int> > subsets;
-    int pos = 0;
-    int length = A.size();
     int M = 10;
     
-    getSubsetNum(A, M, subsets, pos, length);
     
     for(int i = 0; i < subsets.size(); i++)
     {
@@ -76,22 +88,8 @@ int main(int argc, const char * argv[]) {
         cout << endl;
     }
     
-    printf("Number of subsets less than %d: %d\n", M, subsets.size());
-    
-    if ( argc < 2 ) {
-      printf("Specify an array size\n");
-      return 1;
-    }
-    else if ( argc < 3 ) {
-        printf("Specify product limit (m)\n");
-    }
-    
-    srand(time(NULL));
-
-    int n = atoi(argv[1]);
-    int m = atoi(argv[2]);
-    printf("Size: %d\n", n);
-    printf("Max m: %d\n", m);
+    int numSubs = CountSubSets(A, M);
+    cout << "Num of subsets " << numSubs << endl;
     
     return 0;
 }
