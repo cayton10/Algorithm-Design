@@ -3,7 +3,7 @@
 //  subsetProduct
 //  Program counts the number of subsets of array with sums less than 'm'
 //  Created by Benjamin Paul Cayton on 3/20/21.
-//
+//  Assisted by Dr. Mummert, Marshall University CIT Chair
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,9 +16,9 @@ using namespace std;
 
 int CountSubSets(vector<int> const &A, int const &M)
 {
+    
     //Num elements from array / vector 1st-D
     //Product of elements 2nd-D
-    
     vector<vector<int> > cache;
     
     cache.resize(A.size() + 1);
@@ -28,7 +28,7 @@ int CountSubSets(vector<int> const &A, int const &M)
         cache[i].resize(M + 1);
     }
     
-    //Elements(1-J)
+    //Vector A elements(1-J)
     
     for(int target = 2; target <= M; target++)
     {
@@ -42,10 +42,12 @@ int CountSubSets(vector<int> const &A, int const &M)
         {
             //Load cache[numElem][target]
             
-            /*Sum of two things: subseq that don't use next elem & already have prod < target
-             ALSO: seq that DO use next elem, prod of previous is < target / nextElemnt */
+            /*Sum of two things: subseq that do not use next elem & already have prod < target Ex: [1,2,3]
+             ALSO: seq that DO use next elem Ex: [1,2,4], prod of previous is < target / nextElemnt */
             int first = cache[nextElem - 1][target];
             int second = cache[nextElem - 1][target / A[nextElem - 1]];
+            
+            //Round up if there's a remainder from above operation
             if(target % A[nextElem - 1] != 0)
             {
                 second = cache[nextElem - 1][1 + target / A[nextElem - 1]];
@@ -69,27 +71,43 @@ int CountSubSets(vector<int> const &A, int const &M)
     return cache[A.size()][M] - 1; //Minus one for empty sequence
 }
 
+
 int main(int argc, const char * argv[]) {
     
-    //int N = 40;
-    
-    vector<int> A = {1,2,3,4};
-    vector<vector<int> > subsets;
-    int M = 10;
-    
-    
-    for(int i = 0; i < subsets.size(); i++)
-    {
-        for(int k = 0; k < subsets[i].size(); k++)
-        {
-            cout << subsets[i][k] << ", ";
-        }
-        
-        cout << endl;
+    if(argc < 2) {
+        printf("Enter number of elements in set:\n");
+        return 1;
     }
     
-    int numSubs = CountSubSets(A, M);
-    cout << "Num of subsets " << numSubs << endl;
+    if(argc < 3) {
+        printf("Enter the product limit for each subset: \n");
+        return 1;
+    }
     
+    int numInSet = atoi(argv[1]);
+    int M = atoi(argv[2]);
+    
+    printf("Enter number of elements in set: %d\n", numInSet);
+    printf("Maximum product value for subset: %d\n", M);
+    
+    //Vector holds our random numbers
+    vector<int> A(numInSet);
+    
+    int k = 0;
+    //Load sequential vector
+    for (int i = 1; i <= numInSet; i++) {
+        A[k] = i;
+        k++;
+    }
+    
+    //Print random numbers
+    printf("A: ");
+    for ( int i = 0; i < numInSet; i++ )
+      printf("%d ", A[i]);
+    printf("\n");
+    
+    
+    int numSubs = CountSubSets(A, M);
+    printf("Number of subsets not exceeding product of %d: %d\n", M, numSubs);
     return 0;
 }
